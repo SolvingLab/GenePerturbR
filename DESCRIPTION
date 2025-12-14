@@ -1,0 +1,43 @@
+Package: GenePerturbR
+Type: Package
+Title: Genetic Perturbation Analysis with RNA-seq Database
+Version: 1.1.0
+Date: 2025-11-27
+Authors@R: person(
+    given = "Zaoqu",
+    family = "Liu",
+    email = "liuzaoqu@163.com",
+    role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-0452-742X")
+    )
+Author: Zaoqu Liu [aut, cre] (<https://orcid.org/0000-0002-0452-742X>)
+Maintainer: Zaoqu Liu <liuzaoqu@163.com>
+Description: Comprehensive database of 7,665 genetic perturbation RNA-seq datasets 
+    covering 2,810 genes across 1,063 cell lines and 71 tissue types, aggregated into 
+    18.9 million gene-gene relationships (826K high-confidence). Provides intelligent 
+    query functions for gene regulatory network analysis, pathway analysis, and drug 
+    target prediction. Optimized for LLM agent integration with natural language-friendly 
+    interfaces. Combines SQLite for millisecond queries and qs format for raw data access.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 4.0.0)
+Imports:
+    DBI,
+    RSQLite,
+    qs,
+    data.table,
+    dplyr,
+    tidyr,
+    ggplot2,
+    ggrepel,
+    scales
+Suggests:
+    ggraph,
+    igraph,
+    patchwork,
+    clusterProfiler,
+    fgsea,
+    jsonlite
+RoxygenNote: 7.3.3
