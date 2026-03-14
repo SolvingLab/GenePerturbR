@@ -1,0 +1,1620 @@
+
+Designed for: AI Agent Execution + RAG Retrieval + Scientific Reproducibility  
+Target Users: Bioinformatics Engineers + LLM Systems + Cursor AI Agent  
+Core Philosophy: Code-Logic-First + Evidence-Based + Reference-Backed + English Only
+
+
+---
+
+🎯 CORE PURPOSE
+
+This .cursorrules guides Cursor AI to optimize roxygen2 documentation for a RAG-LLM bioinformatics system.
+
+The Two-Embedding System (Critical Understanding)
+- Embedding1: title + @description → LLM selects which function to use
+- Embedding2: @section User Queries → Natural language entry point
+- Workflow: User query → Retrieve both → Union → LLM chooses best function → Generate code → Execute → Read @return + "What You Can Do Next" → Continue
+  
+Five Core Principles
+1. Code-Logic-First: Read and understand code BEFORE writing documentation
+2. Evidence-Based: Use REAL test results (runtime, return structure, dataset info)
+3. Reference-Backed: Always include @references with Paper + DOI (use web_search if not found)
+4. English Only: ALL documentation in English
+5. Executable: All commands must run; ask user when stuck
+  
+
+---
+
+🚨 CRITICAL RULES (NON-NEGOTIABLE)
+
+Rule #0: UNDERSTAND THE CODE FIRST
+
+Before writing ANY documentation:
+
+1. Read the function body - What does it actually do?
+# Example: gpdb_find_targets
+# Read function body to understand:
+# - Queries SQLite database for gene-gene relationships
+# - Filters by confidence level and effect size
+# - Returns separate upregulated/downregulated targets
+# - Aggregates evidence from multiple datasets
+  
+2. Trace the data flow - Input → Processing → Output
+Input: Gene symbol (e.g., "TP53")
+↓
+Process: SQL query → Filter by confidence → Aggregate datasets → Rank by effect size
+↓
+Output: List(upregulated targets, downregulated targets, statistics)
+  
+3. Identify key parameters - Which ones matter scientifically?
+# Important: gene, min_confidence, min_effect_size
+# Less important: direction (defaults to "both")
+# Critical for results: top_n, min_datasets
+  
+4. Find the database source - What is the data basis?
+# GenePerturbR database: 7,665 RNA-seq datasets
+# 18.9M gene-gene relationships (826K high-confidence)
+# Covers 2,810 genes, 1,063 cell lines, 71 tissue types
+  
+Only AFTER understanding the code, proceed to documentation.
+
+
+---
+
+Rule #1: REAL TESTING IS MANDATORY
+
+测试成功是所有的基石 - Without passing tests, nothing else matters!
+
+1. Tests MUST run BEFORE writing documentation
+2. Tests MUST pass successfully
+3. Test results MUST be saved and used:
+  - Use actual runtime for @section Performance Test
+  - Use actual return structure for @return documentation
+  - Use actual dataset info for @examples
+4. If tests fail → STOP IMMEDIATELY and report to user
+  
+How to test:
+# Execute test with timing
+Rscript -e "
+library(GenePerturbR)  # Database auto-configured, ready to use!
+start <- Sys.time()
+result <- gpdb_find_targets('TP53', top_n = 100, min_confidence = 'high')
+runtime <- as.numeric(difftime(Sys.time(), start, units = 'secs'))
+cat('Runtime:', runtime, 'sec\n')
+str(result, max.level = 2)
+"
+
+
+---
+
+Rule #2: ALL CONTENT IN ENGLISH ONLY
+
+✅ MUST be in English:
+- ALL roxygen documentation
+- ALL code comments
+- ALL section headers
+  
+❌ FORBIDDEN:
+- Chinese characters: 串联, 并联, 使用, 比较, 分析, etc.
+  
+
+---
+
+Rule #3: DELETE ALL NOISE (HIGHEST PRIORITY)
+
+🚫 Category 1: Environment Management (MINIMIZE, NOT DELETE)
+- ❌ DELETE: "First-time setup guide", "Step-by-step Python installation", "Troubleshooting conda errors"
+- ✅ KEEP (if applicable): One-sentence dependency note in @details
+- Example - Acceptable (1 sentence):
+#' **Dependencies**: Requires Python via Basilisk (auto-configured on first use).
+#' See \code{vignette("troubleshooting")} if initialization fails.
+- Example - DELETE (too verbose):
+#' **Python Environment Setup**:
+#' \itemize{
+#'   \item First-time users need to configure Basilisk...
+#' }
+- Why: Users search "分析细胞通讯" NOT "配置环境", but reproducibility requires dependency disclosure
+  
+🚫 Category 2: Performance in @description (DELETE ALL)
+- ❌ "Fast/Moderate/Slow", runtime estimates
+- Move to: @section Performance Test
+  
+🚫 Category 3: Filler Words (DELETE ALL)
+- ❌ "built-in pattern analysis", "advanced algorithms", "comprehensive results", "robust/accurate" (when used as generic adjectives)
+- Exception: "robust" is OK when describing statistical properties (e.g., "robust detection", "robust statistics")
+- Why: Dilutes embedding quality, adds no semantic value
+  
+
+---
+
+📋 DOCUMENTATION USAGE IN RAG-LLM PIPELINE
+
+Understanding How Each Field Is Used:
+
+Field
+Embedding
+LLM Stage
+Purpose
+@title
+Embedding1
+Function Selection
+Part of function signature
+@description
+Embedding1
+Function Selection
+LLM decides which function to use
+@section User Queries
+Embedding2
+RAG Retrieval
+Natural language entry point
+@usage
+-
+Code Generation
+Auto-generated from function definition
+@param
+-
+Code Generation
+LLM writes correct parameters
+@examples
+-
+Code Generation
+LLM copies verified code patterns
+@return
+-
+Next Step Planning
+LLM knows output structure
+"What You Can Do Next"
+-
+Continuous Execution
+LLM chains analysis steps
+@references
+-
+Report Generation
+Citation for scientific writing
+
+Critical Understanding:
+- @description is the LLM's decision point - must clearly distinguish functions
+- @usage is auto-generated - no need to write, LLM reads it from help files
+- @param is NOT embedded - only read by LLM during code generation (keep concise: 2-3 lines each)
+- @examples must be executable - LLM copies these patterns
+- "What You Can Do Next" enables continuity - LLM knows how to proceed
+  
+
+---
+
+📋 ENHANCED DOCUMENTATION STRUCTURE
+
+Note on @usage: The @usage section is automatically generated by roxygen2 from the function definition. You do NOT need to write it manually. It will be available in the generated help files for LLM to read during code generation.
+
+
+---
+
+@title (准确+简短+有区分力)
+
+Format: [Analysis Type] with [Method Name]
+
+Good Examples:
+#' Query Gene Perturbation Effects Across All Datasets
+#' Find Upstream Regulators of Target Gene
+#' Predict Therapeutic Targets from Disease Signature
+
+Bad Examples:
+#' Find Targets  ← Too vague
+#' Query Database  ← Not function-specific
+
+
+---
+
+@description (2-3 sentences, 40-80 words)
+
+🔍 Key Principle: Code-Logic-Driven Description
+
+⚠️ CRITICAL: This is used for LLM function selection! 
+- Embedded with @title as embedding1
+- Returned to LLM for choosing the right function
+- Must be clear, specific, and distinguishable from similar functions
+  
+Step 1: Read the code, understand what it ACTUALLY does
+# Example: gpdb_find_targets.R
+# Code shows:
+# - Builds SQL query with filters
+# - Queries gene_effects_agg table
+# - Separates up/down regulated targets
+# - Calculates statistics (consistency, confidence)
+# - Returns structured list with 2 target groups
+
+Step 2: Write description based on code logic
+
+Sentence 1: What + How (Scientific Process + Data Source)
+[Action Verb] [Specific Analysis Type] from [Database Reference] for [Use Case].
+
+Example:
+#' Identify downstream target genes regulated by perturbation, aggregated from 
+#' 7,665 RNA-seq datasets for drug target discovery and pathway analysis.
+
+Why this is better:
+- ✅ "downstream target genes" - specific biological relationship
+- ✅ "aggregated from 7,665 datasets" - clear data source
+- ✅ "drug target discovery" - practical use case
+- ❌ NOT "find targets" alone (too vague - what kind of targets?)
+  
+Sentence 2: When (Data Scope + Confidence)
+**Database covers [scope]** with [confidence level] relationships.
+
+Example:
+#' **Database covers 2,810 genes across 1,063 cell lines** with 826,650 
+#' high-confidence relationships (5+ datasets, >80% consistency).
+
+Sentence 3: Why (OPTIONAL - Unique Output)
+
+⚠️ ONLY include if method has UNIQUE output type
+
+Test: Can other CCI methods produce the same output type?
+- ✅ YES → DELETE Sentence 3
+- ❌ NO → Include specific output
+  
+Example - ✅ Include (unique):
+#' Returns confidence-scored relationships with multi-dataset consistency metrics.
+
+Example - ❌ DELETE (not unique):
+#' Identifies gene targets.  ← All perturbation analysis does this
+
+
+---
+
+@param (Clear & Concise for LLM Code Generation)
+
+🔍 Key Principle: LLM needs to know what parameter does, valid values, and impact
+
+Format (All Parameters):
+
+#' @param param_name [Type]. [One-line summary]. 
+#'   Default: \code{value}. Options/Range: [valid values]. 
+#'   [One-line impact or usage note].
+
+Example:
+
+#' @param min_confidence Character. Evidence strength filter ("high", "medium", "low").
+#'   Default: \code{"medium"}. Options: "high" (5+ datasets), "medium" (2-4), "low" (1). 
+#'   Higher confidence gives reliable results; lower includes exploratory findings.
+
+Key points:
+- ✅ One line = one parameter (2-3 lines max)
+- ✅ Include: Type, Default, Range/Options, Impact
+- ✅ Biological rationale in one sentence
+- ✅ No complex nested structures
+  
+Note: Parameters are NOT embedded. They are read by LLM during code generation. Keep them clear and concise so LLM can write correct function calls.
+
+
+---
+
+@references (Method Citation - MANDATORY)
+
+🔍 Key Principle: If paper reference not found, search and add it
+
+Format:
+
+#' @references
+#' [Authors] ([Year]). [Title]. [Journal] [Volume], [Pages]. \doi{[10.xxxx/xxxxx]}
+
+**STANDARD GPSAdb DATABASE CITATION** (Use this for ALL GenePerturbR functions):
+
+#' @references
+#' Guo S, Xu Z, Dong X, Hu D, Jiang Y, Wang Q, Zhang J, Zhou Q, Liu S, Song W (2022).
+#' GPSAdb: a comprehensive web resource for interactive exploration of genetic perturbation
+#' RNA-seq datasets. Nucleic Acids Research, gkac1066. \doi{10.1093/nar/gkac1066}
+
+**Database Statistics** (include in @description or @details when relevant):
+- 7,665 RNA-seq datasets from genetic perturbation experiments
+- 18.9M gene-gene relationships (826,650 high-confidence)
+- 2,810 perturbed genes across 1,063 cell lines and 71 tissue types
+
+Example for function-specific references:
+#' @references
+#' [Method-specific paper if applicable]
+#' 
+#' Guo S, Xu Z, Dong X, et al. (2022). GPSAdb: a comprehensive web resource for
+#' interactive exploration of genetic perturbation RNA-seq datasets.
+#' Nucleic Acids Research, gkac1066. \doi{10.1093/nar/gkac1066}
+
+If reference not found in code:
+1. Search function comments and dependencies
+2. Search existing @references in other R files: grep -r "@references" R/*.R
+3. If still not found → Use web_search: Search "[method/package name] paper citation DOI"
+4. If web_search fails → Ask user: "Cannot find paper reference for [MethodName], please provide DOI"
+5. ALWAYS include GPSAdb database citation (see standard format above)
+  
+
+---
+
+@section Performance Test (MANDATORY - from real test)
+
+#' @section Performance Test:
+#' \itemize{
+#'   \item **Test query**: [gene] ([query type])
+#'   \item **Runtime**: [XX.XX sec] (database query + aggregation)
+#'   \item **Result size**: [N] relationships returned
+#'   \item **Database**: 18.9M relationships, optimized with SQLite indexing
+#' }
+
+
+---
+
+@details (Scientific Context - OPTIONAL)
+
+Only include if function output needs biological interpretation.
+
+#' @details
+#' **Interpreting Results**:
+#' \itemize{
+#'   \item **[Metric name]**: [What values mean biologically]
+#'   \item **[Metric name]**: [How to interpret in biological context]
+#' }
+
+Example:
+#' @details
+#' **Interpreting Results**:
+#' \itemize{
+#'   \item **logfc_mean**: Average log2 fold change across datasets. |logFC| > 1.5 indicates strong effect.
+#'   \item **consistency_score**: Fraction of datasets showing same direction (0.5-1.0). Score > 0.8 indicates reliable finding.
+#'   \item **confidence**: Evidence classification based on n_datasets and consistency. "high" = 5+ datasets with >80% consistency.
+#' }
+
+Keep it minimal - Focus only on metrics that need biological context
+
+
+---
+
+@return (Clear Structure + Next Steps)
+
+⚠️ CRITICAL: Use REAL test results from Phase 2!
+- Run str(result, max.level = 2) to see actual structure
+- Document actual class, elements, dimensions (not imagined)
+- Use actual column names and data types from test output
+  
+Template:
+
+#' @return [Class] object with [high-level description]
+#'
+#' **Return Structure**:
+#' \describe{
+#'   \item{\strong{result$element}}{[Biological meaning] ([Type], [Dimensions])}
+#'     \itemize{
+#'       \item Key columns: \code{column1} ([meaning]), \code{column2} ([meaning])
+#'     }
+#' }
+#'
+#' **What You Can Do Next**:
+#' \enumerate{
+#'   \item Filter significant results: \code{result$element[result$element$pvalue < 0.05, ]}
+#'   \item Visualize: \code{\link{vis.MethodName}(result)}
+#'   \item Downstream analysis: \code{\link{NextStepFunction}(result)}
+#' }
+#'
+#' **Alternative Methods**:
+#' \itemize{
+#'   \item \code{\link{Alternative1}}: Use when [specific scenario]
+#'   \item \code{\link{Alternative2}}: Use when [different scenario]
+#' }
+
+
+---
+
+@examples (Reproducible + Scientifically Meaningful)
+
+🔍 Key Principle: Examples Should Show What THIS Function Does, Not Entire Workflows
+
+⚠️ CRITICAL: Use the SAME dataset and runtime from Phase 2 test!
+- Dataset name, size, runtime must match actual test results
+- Don't make up "Expected: 200-300 interactions" unless you ran the test
+- Copy exact function call that was tested successfully
+  
+Note: Use \donttest{} instead of \dontrun{}:
+- ✅ Users can run example(FunctionName) to test
+- ✅ Examples are executable and verifiable
+- ✅ Won't run during R CMD check (avoids timeout for long analyses)
+- ✅ R manual compatible and follows CRAN best practices
+  
+Enhanced Format:
+
+#' @examples
+#' \donttest{
+#' # ===========================================================================
+#' # Example 1: Basic Usage (TESTED - runtime: X sec)
+#' # ===========================================================================
+#' # Scientific Question: [What this function answers]
+#' # Query: [gene symbol] perturbation effects
+#' # Expected output: [What to expect from THIS function]
+#' 
+#' # Zero configuration - database auto-loaded!
+#' library(GenePerturbR)
+#' 
+#' result <- gpdb_find_targets(
+#'   gene = "TP53",
+#'   top_n = 100,
+#'   min_confidence = "high"
+#' )
+#' 
+#' # Verify output structure
+#' str(result, max.level = 1)
+#' cat("Targets found:", nrow(result$upregulated) + nrow(result$downregulated), "\n")
+#' 
+#' # Quick preview of results
+#' head(result$upregulated)
+#' head(result$downregulated)
+#' 
+#' # ===========================================================================
+#' # Example 2: Key Parameter Variations (Show impact of 2-3 key params)
+#' # ===========================================================================
+#' # Compare how confidence levels affect results
+#' 
+#' # High confidence: strong evidence, fewer targets
+#' result_high <- gpdb_find_targets(
+#'   gene = "TP53",
+#'   top_n = 50,
+#'   min_confidence = "high"      # 5+ datasets, >80% consistency
+#' )
+#' 
+#' # Medium confidence: include moderate evidence
+#' result_medium <- gpdb_find_targets(
+#'   gene = "TP53",
+#'   top_n = 50,
+#'   min_confidence = "medium"    # 2-4 datasets, >70% consistency
+#' )
+#' 
+#' # Compare results
+#' cat("High confidence:", nrow(result_high$upregulated), "targets\n")
+#' cat("Medium confidence:", nrow(result_medium$upregulated), "targets\n")
+#' 
+#' # ===========================================================================
+#' # Example 3: Effect Size Filtering (if applicable)
+#' # ===========================================================================
+#' # Focus on strong perturbation effects only
+#' 
+#' result_strong <- gpdb_find_targets(
+#'   gene = "TP53",
+#'   top_n = 50,
+#'   min_confidence = "medium",
+#'   min_effect_size = 1.5      # |logFC| > 1.5 only
+#' )
+#' 
+#' cat("All effects:", nrow(result_medium$upregulated), "targets\n")
+#' cat("Strong effects:", nrow(result_strong$upregulated), "targets\n")
+#' cat("Average logFC (strong):", mean(abs(result_strong$upregulated$logfc_mean)), "\n")
+#' 
+#' # ===========================================================================
+#' # Next Steps (Brief pointers to downstream analysis)
+#' # ===========================================================================
+#' # For complete workflows, see:
+#' # - Enrichment analysis: ?gpdb_enrich
+#' # - Visualization: ?gpdb_plot_network
+#' # - Find regulators: ?gpdb_find_regulators
+#' # - Compare genes: ?gpdb_compare_genes
+#' # - Load raw data: ?gpdb_load_data
+#' }
+
+Why this is better:
+- ✅ Focuses on what THIS function does (not 8-step workflows)
+- ✅ Shows parameter impact through comparison
+- ✅ Includes expected outputs for validation
+- ✅ Brief pointers to downstream steps (not full implementation)
+- ✅ Maintains scientific context without overextension
+  
+
+---
+
+@seealso (Workflow-Oriented + Citation-Ready)
+
+Enhanced Template:
+
+#' @seealso
+#' **Data Query** (explore database):
+#' \itemize{
+#'   \item \code{\link{gpdb_list_datasets}}: Find available datasets for a gene
+#'   \item \code{\link{gpdb_get_info}}: Get detailed dataset metadata
+#'   \item \code{\link{gpdb_load_data}}: Load raw expression data and DEG results
+#' }
+#'
+#' **Downstream Analysis** (sequential use):
+#' \itemize{
+#'   \item \code{\link{gpdb_enrich}}: Pathway enrichment analysis (GO/KEGG/MSigDB)
+#'   \item \code{\link{gpdb_plot_network}}: Visualize regulatory network
+#'   \item \code{\link{gpdb_analyze_cascade}}: Trace multi-step regulatory paths
+#'   \item \code{\link{gpdb_compare_genes}}: Compare perturbation effects across genes
+#' }
+#'
+#' **Related Query Functions** (parallel comparison):
+#' \itemize{
+#'   \item \code{\link{gpdb_find_regulators}}: Find upstream genes that regulate target. 
+#'     Use when: Want to know what controls gene X.
+#'   \item \code{\link{gpdb_what_happens}}: Query all effects of gene perturbation. 
+#'     Use when: Want comprehensive overview of gene knockout/knockdown.
+#'   \item \code{\link{gpdb_predict_targets}}: Predict therapeutic targets from signature. 
+#'     Use when: Have disease signature and need drug target candidates.
+#'   \item \code{\link{gpdb_predict_interaction}}: Predict gene-gene interaction type. 
+#'     Use when: Want to understand relationship between two genes.
+#' }
+
+Note: Original method citation and package info are in @references section.
+
+
+---
+
+@section User Queries (Task-Oriented + Data-Centric)
+
+🔍 Purpose: These queries will be embedded separately (embedding2) for RAG retrieval. Focus on data analysis scenarios, not method details.
+
+Query Patterns (Generate 10-20 queries):
+
+#' @section User Queries:
+#' \itemize{
+#'   \item How to analyze [biological question] in my [tissue/cell type] data?
+#'   \item My data shows [observation], which analysis should I use?
+#'   \item Can I apply this to [species] [data type] dataset?
+#'   \item How to compare [condition A] vs [condition B] in [tissue]?
+#'   \item What to do if my [data type] has [specific characteristic]?
+#'   \item Which parameters work best for [dataset size/quality]?
+#'   \item How to interpret [result pattern] in [biological context]?
+#'   \item My analysis returns [unexpected result], what does it mean?
+#'   \item How to validate results in [experimental system]?
+#'   \item What's the next step after finding [result type]?
+#' }
+
+Example for DoCCI.CellChat:
+#' @section User Queries:
+#' \itemize{
+#'   \item What genes does TP53 regulate when knocked out?
+#'   \item Which genes are most consistently affected by MYC perturbation?
+#'   \item How do I find high-confidence targets for drug development?
+#'   \item What happens to cell cycle genes when METTL3 is knocked down?
+#'   \item Can I get targets specific to cancer cell lines?
+#'   \item How reliable are the predicted gene-gene relationships?
+#'   \item What tissue types have been studied for my gene of interest?
+#'   \item How do I filter results by effect size and confidence?
+#'   \item Which databases support my gene perturbation query?
+#'   \item Can I compare perturbation effects between multiple genes?
+#'   ... (10-20 total, focus on perturbation analysis scenarios)
+#' }
+
+
+---
+
+🤖 AI AGENT EXECUTION WORKFLOW
+
+TODO LIST Template (For Cursor Agent to Track Progress)
+
+Before starting, create a TODO list using the following template:
+
+## Documentation Optimization: [FunctionName]
+
+### Phase 1: Code Understanding (CRITICAL)
+- [ ] Read function source code (R/[FunctionName].R)
+- [ ] Identify input → processing → output flow
+- [ ] Understand database query logic (SQL queries, filters, aggregation)
+- [ ] List all parameters and identify 2-3 key ones
+- [ ] Check dependencies on other GenePerturbR functions
+
+### Phase 2: Testing (CRITICAL - MUST PASS)
+- [ ] Create test script with appropriate gene query
+- [ ] Execute test successfully (database auto-configured)
+- [ ] Record runtime (XX.XX sec for database query)
+- [ ] Record result info (N relationships, confidence distribution)
+- [ ] Document return structure (class, elements, data.frame columns)
+- [ ] Save test results for @section Performance Test, @return, and @examples
+
+### Phase 3: Documentation Writing (REQUIRED)
+- [ ] @title: [Analysis Type] with [Method Name]
+- [ ] @description: 2-3 sentences (What + How + When) - CRITICAL for LLM selection
+- [ ] @param: All parameters (clear & concise, 2-3 lines each)
+- [ ] @references: Paper + DOI (if not found, search and add)
+- [ ] @section Performance Test: Runtime + Dataset info (from real test)
+- [ ] @details: Interpreting Results (OPTIONAL - only if output needs biological context)
+- [ ] @return: Return Structure + What You Can Do Next + Alternative Methods
+- [ ] @examples: Example 1 - Basic Usage
+- [ ] @examples: Example 2 - Key Parameter Variations
+- [ ] @examples: Example 3 - Species/Special Usage (if applicable)
+- [ ] @examples: Next Steps (brief pointers)
+- [ ] @seealso: Upstream Preparation
+- [ ] @seealso: Downstream Analysis
+- [ ] @seealso: Alternative Methods (with use cases)
+- [ ] @section User Queries: 10-20 task-centric analysis questions
+
+### Phase 4: Validation (REQUIRED)
+- [ ] No Chinese characters (grep check)
+- [ ] No environment noise (≤1 sentence if needed)
+- [ ] No filler words (robust/comprehensive/advanced)
+- [ ] Has @references with Paper + DOI
+- [ ] Has @section Performance Test with runtime from real test
+- [ ] @description is 2-3 sentences
+- [ ] @examples wrapped in \donttest{}
+- [ ] @seealso links verified (functions exist)
+
+### Phase 5: Final Review (RECOMMENDED)
+- [ ] Test results match documented performance
+- [ ] All code examples are syntactically correct
+- [ ] Cross-references (\link{}) are valid
+- [ ] Biological interpretation is scientifically accurate
+- [ ] Documentation aligns with actual code logic
+
+### Phase 6: Report Generation
+- [ ] Generate Chinese summary report
+- [ ] Include validation checklist results
+- [ ] Provide formatted citation for Methods section
+
+How to use this TODO list:
+1. Copy the template at the start of documentation task
+2. Check off items as you complete them
+3. STOP if any CRITICAL item fails
+4. Report progress to user with checklist status
+  
+
+---
+
+Step-by-Step Protocol (What AI Should Do)
+
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 0: SETUP (Create TODO List)                          │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Copy TODO LIST template from above                      │
+│ 2. Replace [FunctionName] with actual function name        │
+│ 3. Keep TODO list visible throughout the process           │
+│ 4. Check off items as you complete them                    │
+└─────────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 1: CODE UNDERSTANDING (Read Before Writing)          │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Read function source code (entire body)                 │
+│ 2. Identify: Input type → Processing steps → Output type   │
+│ 3. Find original paper (grep for DOI, citations, or URLs)  │
+│    → If not found: use web_search for citation             │
+│    → If web_search fails: ask user                         │
+│ 4. List key parameters and their biological meaning        │
+│ 5. Check for dependencies (other CellScope functions)      │
+│ 6. ✓ Check off Phase 1 items in TODO list                  │
+└─────────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 2: TESTING (Verify Functionality)                    │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Create test script to run function with example query   │
+│ 2. Execute test and measure runtime:                       │
+│    ```                                                       │
+│    Rscript -e "                                             │
+│    library(GenePerturbR)  # Database auto-loads             │
+│    start <- Sys.time()                                      │
+│    result <- FunctionName(...)                             │
+│    runtime <- as.numeric(difftime(Sys.time(), start,       │
+│                          units='secs'))                     │
+│    cat('Runtime:', runtime, 'sec\n')                        │
+│    str(result, max.level = 2)                              │
+│    "                                                         │
+│    ```                                                       │
+│ 3. If test fails → STOP and report error to user           │
+│ 4. If test passes → Document:                              │
+│    - Runtime (XX.XX sec) - measured from start to finish   │
+│    - Result info (N relationships, confidence, genes)      │
+│    - Return structure (class, elements, dimensions)        │
+│ 5. Use these REAL results in @section Performance Test,    │
+│    @return documentation, and @examples                     │
+│    (not estimated or fabricated data)                       │
+│ 6. ✓ Check off Phase 2 items in TODO list                  │
+└─────────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 3: DOCUMENTATION (Write Based on Code + Test)        │
+├─────────────────────────────────────────────────────────────┤
+│ 1. @title: [Analysis] with [Method]                        │
+│ 2. @description: 2-3 sentences (code-logic-driven)         │
+│    - Sentence 1: What + How (include paper reference)      │
+│    - Sentence 2: When (species + requirements)             │
+│    - Sentence 3: Why (only if unique output)               │
+│ 3. @param: All parameters (clear & concise)                │
+│ 4. @references: Paper + DOI (search if not found)          │
+│ 5. @section Performance Test (from test results)           │
+│ 6. @details: Biological Interpretation (if needed)         │
+│ 7. @return: Structure + What You Can Do Next + Alternatives│
+│ 8. @examples: Basic usage + parameter comparison + pointers│
+│ 9. @seealso: Upstream + Downstream + Alternative methods   │
+│ 10. @section User Queries: 10-20 task-centric questions    │
+│ 11. ✓ Check off Phase 3 items in TODO list as you write    │
+└─────────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 4: VALIDATION (Cursor Agent Direct Checks)           │
+├─────────────────────────────────────────────────────────────┤
+│ Cursor Agent should execute these checks directly:         │
+│                                                              │
+│ 1. Check for Chinese characters:                           │
+│    grep -n "[\u4e00-\u9fff]" R/<function_file>.R           │
+│                                                              │
+│ 2. Check for forbidden environment keywords:               │
+│    grep -i "first-time setup\|step-by-step.*install" \     │
+│         R/<function_file>.R                                 │
+│                                                              │
+│ 3. Check for filler words:                                 │
+│    grep -i "robust\|comprehensive\|advanced.*algorithm" \  │
+│         R/<function_file>.R                                 │
+│                                                              │
+│ 4. Verify @references section exists:                      │
+│    grep -A 3 "@references" R/<function_file>.R             │
+│                                                              │
+│ 5. Verify @section Performance Test exists (with real data):│
+│    grep -A 3 "@section Performance Test" R/<function_file>.R│
+│    # Should contain runtime and dataset from actual test   │
+│                                                              │
+│ 6. Check @description length (should be 2-3 sentences):    │
+│    sed -n '/#'\'' @description/,/#'\''/p' R/<file>.R | \    │
+│         wc -l  # Should be 3-5 lines                        │
+│                                                              │
+│ 7. Verify @examples has \donttest wrapper:                 │
+│    grep -A 2 "@examples" R/<function_file>.R | \           │
+│         grep "\\\\donttest"                                 │
+│                                                              │
+│ 8. Verify @seealso function links exist:                   │
+│    # Extract linked functions and check if they exist      │
+│    # Note: May not catch S3/S4 methods or imported funcs   │
+│    grep "\\\\link{" R/<function_file>.R | \                │
+│         sed 's/.*\\link{\([^}]*\)}.*/\1/' | while read f;do│
+│           if grep -q "$f" R/*.R; then                      │
+│             echo "✓ $f found in codebase"                  │
+│           else                                              │
+│             echo "⚠ Warning: $f not found (may be S3/S4)"  │
+│           fi                                                │
+│         done                                                │
+│ 9. ✓ Check off Phase 4 validation items in TODO list       │
+└─────────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 5: REPORTING (中文输出 + TODO Progress)              │
+├─────────────────────────────────────────────────────────────┤
+│ ✅ 文档优化完成：[FunctionName]                             │
+│                                                              │
+│ **代码理解**：[简述函数核心逻辑 - 输入/处理/输出]          │
+│ **测试验证**：[dataset], [size] cells, [runtime] sec       │
+│ **参考文献**：[Authors Year Journal DOI]                    │
+│                                                              │
+│ **关键修改**：                                              │
+│ - @title: [Analysis Type] with [Method Name]               │
+│ - @description: [2-3句话，基于代码逻辑]                     │
+│ - @param: [n]个参数（简洁清晰，2-3行/参数）                │
+│ - @references: 添加Paper + DOI（搜索并验证）               │
+│ - @section Performance Test: Runtime + Dataset (真实测试)  │
+│ - @details: 添加Biological Interpretation (if needed)      │
+│ - @return: 添加Return Structure + What You Can Do Next    │
+│ - @examples: 基本用法 + 参数对比 + 下游指针                │
+│ - @seealso: Upstream + Downstream + Alternatives           │
+│ - User Queries: [n]个任务导向问题                          │
+│                                                              │
+│ **验证检查**：                                              │
+│ - [✓/✗] 无中文字符                                         │
+│ - [✓/✗] 无环境配置冗余（≤1句话）                           │
+│ - [✓/✗] 无填充词（robust作为统计术语除外）                 │
+│ - [✓/✗] 有 @references 章节（Paper + DOI）                 │
+│ - [✓/✗] 有 @section Performance Test（真实测试结果）       │
+│ - [✓/✗] @examples 用 \donttest{} 包裹                      │
+│ - [✓/✗] @seealso 函数链接已验证                            │
+│                                                              │
+│ **TODO 完成度**：Phase 1 [✓] Phase 2 [✓] Phase 3 [✓]      │
+│                  Phase 4 [✓] Phase 5 [✓]                   │
+│                                                              │
+│ **参考文献格式**：[formatted citation for Methods section] │
+└─────────────────────────────────────────────────────────────┘
+
+
+---
+
+📊 QUALITY CHECKLIST (Cursor Agent Execution)
+
+Note: This checklist mirrors the TODO LIST Phase 4. Use TODO LIST during work, and this checklist for final verification.
+
+After writing documentation, Cursor Agent should verify:
+
+Testing (CRITICAL - MUST PASS)
+[] Function test executed successfully
+[] Runtime documented in @section Performance Test
+[] Test dataset details included in @examples
+[] Output structure verified and documented in @return
+
+Content Quality (REQUIRED)
+[] No Chinese characters found (run: grep -n "[\u4e00-\u9fff]" R/<file>.R)
+[] No environment setup noise (max 1 sentence if needed)
+[] No filler words ("robust" as statistical term is OK, generic adjectives not)
+[] Has @references section with paper citation and DOI
+[] Has @section Performance Test with runtime from real test
+[] @description is 2-3 sentences (40-80 words)
+
+Structure (REQUIRED)
+[] @return has "Return Structure" + "What You Can Do Next" sections
+[] @return shows programmatic access examples and downstream paths
+[] @examples wrapped in \donttest{}
+[] @examples shows: Basic usage + Parameter variations + Next steps pointer
+[] @seealso has: Upstream preparation + Downstream analysis + Alternative methods
+[] @seealso function links verified (run grep check)
+
+Biological Context (RECOMMENDED)
+[] All parameters clearly documented (2-3 lines each)
+[] Has "Interpreting Results" guidance (OPTIONAL - only if output needs biological context)
+[] @section User Queries has 10-20 task-centric questions (for RAG embedding)
+
+Pass Criteria
+- All CRITICAL items pass → Proceed to next phase
+- All REQUIRED items pass → Documentation is acceptable
+- RECOMMENDED items → Enhance quality but not mandatory
+  
+If any CRITICAL item fails → STOP immediately and fix before proceeding
+
+
+---
+
+🚨 ERROR RECOVERY GUIDE
+
+Common Issues and Solutions
+
+Issue 1: Test fails to execute
+Error: Database connection failed
+Solution:
+1. Check if package loaded correctly: library(GenePerturbR)
+2. Verify database initialized: Should see startup message with gene pair count
+3. If still fails, ask user: "Is the database properly configured?"
+  
+Issue 2: Database query returns empty results
+Warning: No data found for gene
+Solution:
+1. Check gene symbol format: Should be uppercase (e.g., "TP53" not "tp53")
+2. Verify gene exists in database: Run gpdb_search(gene)
+3. Try alternative gene symbols or check for aliases
+4. Ask user: "Is this gene available in the database? Try gpdb_search() to verify"
+  
+Issue 3: Function returns complex nested structure
+str(result) shows deeply nested list with 50+ elements
+Solution:
+1. Focus on top 3-5 most important elements for @return documentation
+2. Use str(result, max.level = 2) to avoid overwhelming detail
+3. Ask code: What elements are used in examples? Document those first
+  
+Issue 4: Unable to identify key parameters (all seem important)
+Function has 20+ parameters, which are "key"?
+Solution:
+1. Check parameter defaults: Non-default params are usually more important
+2. Look for parameters used in function examples (if any exist)
+3. Biological logic: Parameters affecting what is analyzed > how it's computed
+4. Ask user: "Which 2-3 parameters most impact [FunctionName] results?"
+  
+Issue 5: Validation checks fail after writing
+grep found Chinese characters in documentation
+Solution:
+1. Run: grep -n "[\u4e00-\u9fff]" R/<file>.R to find exact location
+2. Common culprit: Copy-pasted comments from old code
+3. Replace Chinese with English equivalent
+4. Re-run validation
+  
+Issue 6: @seealso links not found
+Warning: RunQC not found in codebase
+Solution:
+1. Check if function exists with different case: grep -i "runqc" R/*.R
+2. Check if it's from external package: Should use \code{package::function()} instead of \link{}
+3. Remove link if function doesn't exist: Use plain text instead
+  
+General Recovery Strategy:
+IF (Phase 2 test fails):
+  → Fix test setup → Re-run Phase 2 → Continue to Phase 3
+
+IF (Cannot find critical info like paper reference):
+  → Document what you CAN find → Mark [TODO: Add reference] → Ask user
+
+IF (Documentation validation fails):
+  → Fix specific issue → Re-run validation → Continue
+
+IF (Multiple issues compound):
+  → STOP → Report to user: "Cannot proceed because [reasons]" → Request guidance
+
+
+---
+
+🔧 PARAMETER DOCUMENTATION GUIDELINES
+
+Avoid Redundancy, Keep Scientific Necessity
+
+❌ Redundant (DELETE):
+#' @param gene Character. Gene symbol to query. The gene symbol should be in 
+#'   standard format. This gene should exist in the GenePerturbR database. 
+#'   The database contains 2,810 genes...
+Problem: Repeats "gene" 3 times. Too verbose.
+
+✅ Concise + Scientific (KEEP):
+#' @param gene Character. Gene symbol (e.g., "TP53", "MYC"). Must exist in database 
+#'   (use gpdb_search() to verify). Case-insensitive but uppercase recommended.
+Why better: One sentence, includes practical guidance.
+
+
+---
+
+❌ Non-Scientific Verbosity (DELETE):
+#' @param min_datasets The minimum number of datasets that must support a 
+#'   gene-gene relationship in order for that relationship to be included in 
+#'   the results. Relationships with fewer datasets will be automatically 
+#'   filtered out before returning the query results.
+Problem: 3 sentences to say one thing.
+
+✅ Scientific Clarity (KEEP):
+#' @param min_datasets Integer. Minimum supporting datasets for evidence strength (default: 2).
+#'   Higher values increase reliability but reduce candidates. Set to 5+ for publication-grade 
+#'   evidence, or 1 for exploratory analysis including single-study findings.
+Why better: Includes biological rationale (evidence strength) and usage guidance.
+
+
+---
+
+🎯 FINAL CHECKLIST (Before Committing)
+
+For Cursor Agent: Execute These Checks
+
+# 1. Code understanding check
+echo "✓ Read function source code"
+echo "✓ Identified input/output structure"
+echo "✓ Found original paper reference"
+
+# 2. Testing check - Run function test
+Rscript -e "
+library(GenePerturbR)  # Database auto-configured
+start <- Sys.time()
+result <- FunctionName(...)
+runtime <- as.numeric(difftime(Sys.time(), start, units='secs'))
+cat('✓ Test passed - Runtime:', runtime, 'sec\n')
+str(result, max.level = 2)
+"
+
+# 3. Documentation validation - Direct checks
+FILE="R/FunctionName.R"
+
+# Check 3a: No Chinese characters
+if grep -q "[\u4e00-\u9fff]" "$FILE"; then
+  echo "✗ Chinese characters found"
+else
+  echo "✓ No Chinese characters"
+fi
+
+# Check 3b: No environment noise
+if grep -qi "first-time setup\|step-by-step.*install" "$FILE"; then
+  echo "✗ Environment noise found"
+else
+  echo "✓ No environment noise"
+fi
+
+# Check 3c: Has @references section
+if grep -q "@references" "$FILE"; then
+  echo "✓ Has @references section"
+else
+  echo "✗ Missing @references section"
+fi
+
+# Check 3d: Has @section Performance Test
+if grep -q "@section Performance Test" "$FILE"; then
+  echo "✓ Has @section Performance Test"
+else
+  echo "✗ Missing @section Performance Test"
+fi
+
+# Check 3e: Examples wrapped in \donttest
+if grep -A 2 "@examples" "$FILE" | grep -q "\\\\donttest"; then
+  echo "✓ Examples properly wrapped"
+else
+  echo "✗ Examples missing \\donttest"
+fi
+
+# Check 3f: @seealso function links exist
+echo "Checking @seealso links..."
+grep "\\\\link{" "$FILE" | sed 's/.*\\link{\([^}]*\)}.*/\1/' | while read func; do
+  if grep -q "$func" R/*.R; then
+    echo "✓ $func found in codebase"
+  else
+    echo "⚠ Warning: $func not found (may be external package or S3/S4 method)"
+  fi
+done
+
+# 4. Self-review checklist
+echo "✓ @description based on code logic (not generic)"
+echo "✓ All parameters clearly documented (2-3 lines each)"
+echo "✓ Examples show function core usage"
+echo "✓ Has paper citation with DOI"
+
+
+---
+
+
+---
+
+🎯 REMEMBER THE CORE PURPOSE
+
+The Complete RAG → LLM → Code Generation → Execution Workflow
+
+User Query ("What genes does TP53 regulate?")
+    ↓
+┌─────────────────────────────────────────────────┐
+│ RAG Retrieval (parallel search)                │
+├─────────────────────────────────────────────────┤
+│ Embedding1: title + @description               │
+│ Embedding2: @section User Queries             │
+│ → Retrieve + Union → Return matches            │
+└─────────────────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────────────────┐
+│ LLM Function Selection                         │
+├─────────────────────────────────────────────────┤
+│ Input: title + @description from candidates    │
+│ LLM decides: "gpdb_find_targets is best match"│
+└─────────────────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────────────────┐
+│ LLM Code Generation                            │
+├─────────────────────────────────────────────────┤
+│ Input: title + @param + usage + @examples     │
+│ Note: usage auto-generated from function def  │
+│ LLM writes: result <- gpdb_find_targets(...)  │
+│ → Execute in container                         │
+└─────────────────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────────────────┐
+│ LLM Next Step (Continuous Execution)          │
+├─────────────────────────────────────────────────┤
+│ Input: @return + "What You Can Do Next"       │
+│ LLM sees: "Enrich with gpdb_enrich()..."      │
+│ LLM writes next code → Continuous workflow    │
+└─────────────────────────────────────────────────┘
+
+Critical Documentation Elements for This Workflow
+
+Element
+Purpose
+Why Critical
+@title + @description
+LLM function selection
+Embedded as embedding1, must distinguish functions
+@section User Queries
+RAG retrieval
+Embedded as embedding2, natural language entry
+@param + @examples
+Code generation
+Must be verified/executable for accurate code
+@return + "What You Can Do Next"
+Continuous execution
+LLM knows how to chain analysis steps
+@references
+Citation/reproducibility
+For scientific reporting
+
+Cursor AI's Role
+- Read this .cursorrules file
+- Understand the complete RAG → LLM workflow
+- Optimize documentation to enable this workflow
+  
+Five Core Principles
+1. Code-Logic-First: Read code BEFORE writing (avoid hallucination)
+2. Evidence-Based: Use REAL test results (examples must work)
+3. Database-Backed: Document database scope and confidence levels
+4. English Only: ALL documentation in English
+5. Executable: Ask user when stuck, don't guess
+  
+核心原则：先理解代码逻辑，再写文档。基于真实测试结果，不基于想象。遇到困难就问用户。
+
+
+---
+
+🎨 VISUALIZATION FUNCTIONS - SPECIAL CONSIDERATIONS
+
+Note: This section applies to visualization functions (e.g., gpdb_plot_* functions).
+
+Unified Academic Theme (IMPORTANT)
+
+All GenePerturbR visualization functions use a consistent academic publication theme.
+
+The gpdb Theme System:
+- Clean white background with minimal gridlines
+- Publication-ready fonts and sizing
+- Colorblind-friendly palettes (viridis, RdBu)
+- Automatic dimension optimization for figures
+- Consistent styling across all plot types
+  
+
+---
+
+Standard Visualization Parameter Documentation
+
+For visualization functions, document key parameters as:
+
+#' @param colors Character vector. Custom color palette for the plot.
+#'   Default: Automatically selected based on plot type (viridis for continuous, 
+#'   RdBu for diverging). Provide vector of colors to override.
+#' @param theme Character. ggplot2 theme to use: "academic" (default), "minimal", "classic".
+#'   Academic theme optimized for publication with clean white background.
+
+Example for enrichment dotplot:
+#' @param color.by Character. Variable to map to point color: "p.adjust" (default), 
+#'   "pvalue", "FoldEnrich". Controls color gradient in dotplot.
+
+
+---
+
+Standard Workflow for Visualization Functions
+
+For gpdb_plot_* functions, follow this workflow:
+
+Phase 1: Code Understanding
+    ↓
+Phase 1.5: THEME VERIFICATION (For gpdb_plot_* functions)
+├─ Check current theme implementation
+├─ Verify uses .gpdb_theme_default() or theme_bw()
+├─ Check color palettes are publication-friendly
+│   ├─ Continuous: viridis, plasma, inferno
+│   ├─ Diverging: RdBu, BrBG (for fold changes)
+│   └─ Categorical: ggplot2 defaults or custom palettes
+└─ Test plot renders correctly
+    ↓
+Phase 2: Testing (verify visual output)
+    ↓
+Phase 3-5: Standard documentation workflow
+
+
+---
+
+Code Examples for Common Scenarios
+
+Scenario 1: Volcano plot (up/down regulated genes)
+# In function body:
+p <- ggplot(data, aes(x = logFC, y = -log10(padj))) +
+  geom_point(aes(color = regulation), size = 2) +
+  scale_color_manual(values = c("up" = "red", "down" = "blue", "ns" = "grey"))
+
+Scenario 2: Heatmap with diverging colors (fold changes)
+# In function body:
+scale_fill_gradientn(
+  colors = c("#2166AC", "white", "#B2182B"),
+  values = scales::rescale(c(-3, 0, 3)),
+  limits = c(-3, 3)
+)
+
+Scenario 3: Enrichment dotplot (continuous p-values)
+# In function body:
+scale_color_viridis_c(option = "plasma", direction = -1)
+
+
+---
+
+Why Unified Theme Matters
+
+Benefit
+Impact
+Visual consistency
+All GenePerturbR plots use publication-ready styling
+User experience
+Figures look professional without manual adjustment
+Reproducibility
+Consistent aesthetics across analyses and papers
+Documentation
+Standardized visualization examples in all documentation
+
+
+---
+
+Validation for Visualization Functions
+
+Additional checks for gpdb_plot_* functions:
+
+# Check if function uses academic theme
+if grep -q ".gpdb_theme_default\\|theme_bw" R/<vis_function>.R; then
+  echo "✓ Uses publication theme"
+else
+  echo "⚠ Warning: Not using standard theme - consider .gpdb_theme_default()"
+fi
+
+# Check if function returns ggplot object
+if grep -q "class.*ggplot\\|return(p)" R/<vis_function>.R; then
+  echo "✓ Returns ggplot object (user can customize)"
+else
+  echo "⚠ Warning: Check return type - should be ggplot for flexibility"
+fi
+
+
+---
+
+End of Visualization Special Considerations
+
+
+---
+
+📊 DATABASE QUERY FUNCTIONS - SPECIAL CONSIDERATIONS
+
+Note: This section applies to functions that query the GenePerturbR SQLite database (e.g., gpdb_find_targets, gpdb_what_happens).
+
+Core Principle: Zero-Configuration Database Access
+
+Goal: User queries gene relationships with millisecond response times.
+
+User Experience:
+- **Zero setup required** - Database auto-configured on package load
+- First query: Instant connection (~50-200 ms)  
+- Subsequent queries: Cached connection (<50 ms)
+- Gene annotations: Smart cache (load once, reuse forever)
+  
+
+---
+
+Critical Understanding: Three-Tier Architecture
+
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 1: R Function (gpdb_find_targets)                   │
+│ - User-facing interface                                    │
+│ - Parameter validation                                     │
+│ - Calls SQL query builder                                  │
+└─────────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 2: SQL Query Builder (.gpdb_build_query)            │
+│ - Constructs optimized SQL queries                         │
+│ - Applies filters and sorting                              │
+│ - Returns DBI connection results                           │
+└─────────────────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 3: SQLite Database (gene_effects_agg table)         │
+│ - 18.9M pre-computed gene-gene relationships               │
+│ - Indexed for fast queries                                 │
+│ - Returns aggregated multi-dataset results                 │
+└─────────────────────────────────────────────────────────────┘
+
+
+---
+
+Database Architecture (User-Transparent)
+
+**Zero Configuration Design**:
+- Database connection auto-managed by package
+- Gene annotations cached on first use
+- Connection pool optimized for concurrent queries
+
+**Usage** (No setup needed!):
+```r
+library(GenePerturbR)  # Auto-loads database
+# ✓ GenePerturbR loaded successfully
+# ✓ Database: gpsadb.db (18,872,901 gene pairs)
+
+result <- gpdb_find_targets("TP53")  # Just works!
+```
+
+**Database Structure** (Internal):
+- **gene_effects_agg**: 18.9M pre-computed relationships
+- **datasets**: 7,665 perturbation experiments
+- **gene_annotation**: Ensembl ↔ Symbol mapping (cached)
+- **Indexes**: Sub-second query response
+
+
+---
+
+Common Database Issues and Solutions
+
+Issue 1: Database Not Loading
+
+Symptoms:
+Package loads but no database message shown
+
+Cause: Database not properly configured at package level.
+
+Solution:
+```r
+# Check package startup message
+library(GenePerturbR)
+# Should see: "GenePerturbR loaded successfully"
+# Should see: "Database: gpsadb.db (18,872,901 gene pairs)"
+
+# Test query
+result <- gpdb_search("TP53")
+
+# If fails, contact package maintainer - this is NOT user-configurable
+```
+  
+
+---
+
+Issue 2: Query Returns Error
+
+Symptoms:
+Error: Database query failed
+
+Cause: Internal connection issue or corrupted query.
+
+Solution:
+```r
+# Restart R session
+.rs.restartR()  # In RStudio
+# Or: quit and restart R
+
+# Reload package
+library(GenePerturbR)
+
+# Try simple query first
+result <- gpdb_search("TP53")
+
+# If still fails, this is a package-level issue - report to maintainer
+```
+
+
+---
+
+Issue 3: Query Returns No Results
+
+Symptoms:
+Found 0 datasets for gene: xxx
+
+Cause: Gene symbol not in database or incorrect format.
+
+Solution:
+```r
+# Search for gene (checks aliases and Ensembl IDs)
+gpdb_search("TP53")  # Returns available genes matching query
+
+# Check exact symbol
+datasets <- gpdb_list_datasets(gene = "TP53")
+
+# Try alternative symbols
+gpdb_search("P53")  # May find TP53
+```
+
+
+
+
+---
+
+End of Database Query Special Considerations
+
+
+---
+
+🎯 GENEPURTURBR-SPECIFIC DESIGN PATTERNS
+
+Understanding these patterns helps write better documentation.
+
+Pattern 1: Zero-Configuration Philosophy
+```r
+# ❌ BAD - Don't document setup steps
+#' @details
+#' Before using this function, set APIKIT_DB_PATH environment variable...
+
+# ✅ GOOD - Emphasize zero-config
+#' @details
+#' Database auto-configured on package load. No setup required.
+```
+
+Pattern 2: Confidence-Based Filtering
+```r
+# All query functions support confidence filtering
+gpdb_find_targets(gene, min_confidence = "high")  # 5+ datasets
+gpdb_find_regulators(gene, min_confidence = "medium")  # 2-4 datasets
+
+# Document this consistently:
+#' @param min_confidence Character. Evidence strength: "high" (5+ datasets, 
+#'   most reliable), "medium" (2-4 datasets, default), "low" (1 dataset, exploratory).
+```
+
+Pattern 3: Return Structure Consistency
+```r
+# Query functions return structured lists:
+result <- gpdb_find_targets("TP53")
+# $upregulated: data.frame with target genes
+# $downregulated: data.frame with target genes  
+# $summary: character with natural language description
+
+# Always document with programmatic access examples:
+#' @return List containing:
+#' \describe{
+#'   \item{upregulated}{Data.frame of upregulated targets with columns:
+#'     \code{target_gene}, \code{logfc_mean}, \code{n_datasets}, \code{confidence}}
+#'   \item{downregulated}{Data.frame of downregulated targets}
+#' }
+#'
+#' **Programmatic Access**:
+#' \itemize{
+#'   \item Get top 10 upregulated: \code{head(result$upregulated, 10)}
+#'   \item Filter high confidence: \code{result$upregulated[result$upregulated$confidence == "high", ]}
+#' }
+```
+
+Pattern 4: Natural Language Summaries
+```r
+# Many functions return $summary with human-readable text
+result <- gpdb_what_happens("TP53")
+cat(result$summary)
+# "TP53 has been studied in 71 experiments across 45 cell lines..."
+
+# Document this for LLM consumption:
+#' @return List with:
+#' \describe{
+#'   \item{summary}{Natural language description of results (LLM-friendly)}
+#' }
+```
+
+Pattern 5: Context-Aware Queries
+```r
+# Optional context filtering without breaking API
+gpdb_what_happens("TP53")  # All datasets
+gpdb_what_happens("TP53", context = list(tissue = "Lung"))  # Lung only
+gpdb_what_happens("TP53", context = list(cell_line = "A549"))  # A549 only
+
+# Document context as optional enhancement:
+#' @param context List. Optional filters to restrict analysis:
+#'   \itemize{
+#'     \item tissue: Specific tissue type (e.g., "Lung", "Liver")
+#'     \item cell_line: Specific cell line (e.g., "A549", "HeLa")
+#'   }
+#'   If NULL (default), queries all available datasets.
+```
+
+Pattern 6: Smart Caching (Internal, Don't Over-Document)
+```r
+# Gene annotation caching happens automatically
+# Users never interact with cache directly
+# Only mention if relevant to performance
+
+# ❌ BAD - Too much implementation detail
+#' @details
+#' This function uses .gpdb_get_gene_mapping() which caches gene annotations
+#' in .gpdb_env for fast repeated access...
+
+# ✅ GOOD - User-relevant performance note
+#' @section Performance:
+#' Gene symbol conversion is cached for fast repeated queries.
+#' First call: ~200ms. Subsequent calls: <50ms.
+```
+
+Pattern 7: SQL Builder (Internal, Users Don't See)
+```r
+# Users never write SQL
+# All queries go through .gpdb_build_query()
+# Don't document SQL internals
+
+# ❌ BAD
+#' @details
+#' Constructs SQL query using .gpdb_build_query() with filters...
+
+# ✅ GOOD
+#' @details
+#' Queries pre-computed database with optimized indexes for fast retrieval.
+```
+
+Pattern 8: Function Chaining Workflows
+```r
+# Design encourages chaining
+targets <- gpdb_find_targets("TP53", top_n = 100)
+enrich <- gpdb_enrich(targets, enrich.type = "GO")
+plot <- gpdb_plot_enrichment(enrich)
+
+# Document next steps in @return:
+#' @return List with target genes.
+#'
+#' **What You Can Do Next**:
+#' \enumerate{
+#'   \item Enrichment analysis: \code{gpdb_enrich(result, enrich.type = "GO")}
+#'   \item Network visualization: \code{gpdb_plot_network(gene, top_targets = 50)}
+#'   \item Load raw data: \code{gpdb_load_data(dataset_id)}
+#' }
+```
+
+Pattern 9: Batch Operations
+```r
+# Some functions support batch queries
+datasets <- gpdb_list_datasets(gene = "TP53")
+batch_data <- gpdb_load_batch(datasets$dataset_id[1:10])
+
+# Document batch efficiency:
+#' @section Performance:
+#' Batch loading is optimized with progress tracking. Loading 10 datasets
+#' takes ~5 seconds vs ~10 seconds for individual calls.
+```
+
+Pattern 10: Error Messages (User-Friendly)
+```r
+# Functions provide helpful error messages
+gpdb_find_targets("NOTEXIST")
+# "No data found for gene: NOTEXIST"
+# "Try gpdb_search('NOTEXIST') to find similar genes"
+
+# Document error handling:
+#' @section Error Handling:
+#' If gene not found, returns empty result with informative message.
+#' Use \code{gpdb_search()} to find available genes or check aliases.
+```
+
+---
+
+End of GenePerturbR-Specific Design Patterns
+
+
+---
+
+📝 SUMMARY: GenePerturbR Documentation Best Practices
+
+Core Workflow:
+1. **Understand**: Read code logic → trace data flow → identify key parameters
+2. **Test**: Run actual queries → measure performance → document real results
+3. **Document**: Clear @description → comprehensive @param → executable @examples
+4. **Validate**: No Chinese → No filler words → Has @references → Has Performance Test
+
+Key Differences from Single-Cell Analysis Packages:
+- **Data Source**: Pre-computed database (18.9M relationships) vs. raw single-cell data
+- **Query Speed**: Milliseconds (SQL) vs. minutes (computation)
+- **Evidence**: Multi-dataset aggregation with confidence scores
+- **Use Case**: Gene regulation discovery vs. cell-type-specific analysis
+- **Setup**: Zero configuration (auto-load) vs. manual data preparation
+
+GenePerturbR Unique Features to Emphasize:
+1. **Zero-Configuration Design**
+   - Database auto-loads on `library(GenePerturbR)`
+   - Connection pooling managed internally
+   - Gene annotation caching (load once, reuse forever)
+   - Users never see database paths or connection objects
+
+2. **SQL Query Builder System**
+   - Unified `.gpdb_build_query()` prevents code duplication
+   - Automatic SQL injection protection via `.gpdb_sql_safe()`
+   - Optimized with indexes for sub-second queries
+   - Smart filtering (confidence, effect size, tissue, cell line)
+
+3. **Multi-Dataset Aggregation**
+   - 7,665 experiments → 18.9M relationships
+   - Confidence scoring: high (5+ datasets), medium (2-4), low (1)
+   - Consistency metrics: fraction of datasets agreeing on direction
+   - Effect size averaging: robust to outliers
+
+4. **Intelligent Caching**
+   - Gene ID→Symbol mapping cached in package environment
+   - First query: ~200ms (includes cache load)
+   - Subsequent queries: <50ms (cache hit)
+   - Session-persistent, memory-efficient
+
+5. **Natural Language Summaries**
+   - `gpdb_what_happens()` returns human-readable text
+   - Auto-generated from query results
+   - LLM-friendly format for RAG retrieval
+   - Example: "TP53 has been studied in 71 experiments across 45 cell lines..."
+
+Documentation Focus:
+- **Emphasize zero-config**: "Just `library(GenePerturbR)` and go!"
+- **Database scope**: 2,810 genes, 7,665 datasets, 71 tissues, 1,063 cell lines
+- **Confidence system**: Explain high/medium/low with dataset counts
+- **SQL filtering**: gene, tissue, cell line, method, effect size
+- **Function chaining**: query → enrich → visualize → interpret
+- **Return structures**: Always data.frames with clear column names
+
+Common User Queries to Address:
+- "What genes does X regulate?" → `gpdb_find_targets()`
+- "Who regulates X?" → `gpdb_find_regulators()`
+- "What happens when X is knocked out?" → `gpdb_what_happens()`
+- "High-confidence targets for drug development?" → Use `min_confidence = "high"`
+- "Compare effects across genes?" → `gpdb_compare_genes()`
+- "Filter by tissue/cell line?" → Use `context` parameter
+- "Load raw data for custom analysis?" → `gpdb_load_data()`
+
+Function Categories (for @seealso):
+1. **Query Functions**: `gpdb_what_happens`, `gpdb_find_targets`, `gpdb_find_regulators`
+2. **Data Access**: `gpdb_list_datasets`, `gpdb_get_info`, `gpdb_load_data`, `gpdb_load_deg`
+3. **Comparison**: `gpdb_compare_genes`, `gpdb_compare_contexts`
+4. **Prediction**: `gpdb_predict_targets`, `gpdb_predict_interaction`
+5. **Network Analysis**: `gpdb_analyze_cascade`, `gpdb_plot_network`, `gpdb_plot_cascade`
+6. **Enrichment**: `gpdb_enrich`, `gpdb_plot_enrichment`
+7. **Visualization**: `gpdb_plot_volcano`, `gpdb_plot_heatmap_deg`, `gpdb_plot_heatmap_expr`
+8. **Utilities**: `gpdb_search`, `gpdb_summarize`, `gpdb_gene_family`, `gpdb_pathway_genes`
+
+核心原则总结：
+1. 代码逻辑优先 - 先理解再写
+2. 真实测试结果 - 不编造数据
+3. 数据库为中心 - 强调多数据集聚合
+4. 零配置设计 - 用户无感知，开箱即用
+5. 英文文档 - 无中文字符
+6. 可执行示例 - 确保代码能运行
+
+---
+
+*GenePerturbR .cursorrules - Optimized for RAG-LLM Documentation System*
+*Based on CellScope .cursorrules framework*
+*Last updated: January 2026*
